@@ -1,11 +1,7 @@
-from simpleasset import config
-from simpleasset import filters
+import errno
+import os
 
-ASSET_EXTS = {
-    "tmpl":     "text/generictemplate",
-    "template": "text/generictemplate",
-    "jinja":    "text/jinja2"
-}
+from simpleasset import AssetException, config, filters
 
 ASSET_CLASSES = {
     "": [
@@ -16,66 +12,69 @@ ASSET_CLASSES = {
     "CSS": []
 }
 
-ASSET_FILTERS = {
-    "text/generictemplate": {
-        "type": "python",
-        "func": "jinja2_filter"
-    },
-    "text/jinja2": {
-        "type": "python",
-        "func": "jinja2_filter"
-    }
-}
 
-ASSET_SOURCES = [
-    {
-        "in": "samples",
-        "out": "samples/out"
-    }
-]
+def make_sure_path_exists(path):
+    path = os.path.dirname(path)
+    try:
+        os.makedirs(path)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
 
-ASSET_CONTEXT = {
-    "name": "John Doe",
-    "chain_name": "{{ name }}"
-}
 
 def process(fname, text, clas=""):
-    mime = ASSET_EXTS.get(fname.split(".")[-1], None)
+    mime = config.ASSET_EXTS.get(fname.split(".")[-1], None)
     while mime:
-        filt = ASSET_FILTERS[mime]
+        filt = config.ASSET_FILTERS[mime]
 
         if filt['type'] == "python":
             try:
                 fun = getattr(filters, filt['func'])
             except AttributeError:
-                raise Exception("Filter %s not available." % filt['func'])
-            text = fun(text, ASSET_CONTEXT)
+                raise AssetException("Filter %s not available." % filt['func'])
+            text = fun(text, config.ASSET_CONTEXT)
             fname = ".".join(fname.split(".")[:-1])
 
         elif filt['type'] == "pipe":
             pass
         else:
-            raise Exception("Type %s not understood." % filt['type'])
+            raise AssetException("Type %s not understood." % filt['type'])
 
-        mime = ASSET_EXTS.get(fname.split(".")[-1], None)
+        mime = config.ASSET_EXTS.get(fname.split(".")[-1], None)
     return (fname, text, clas)
+
 
 def process_file(fname):
-    # Read file
-    f = open(fname)
-    text = f.read()
-    f.close()
-
-    # Process
-    (fname, text, clas) = process(fname, text)
-
-    # rename directory
-    for source in ASSET_SOURCES:
+    # get asset directory
+    source = None
+    for asource in config.ASSET_SOURCES:
         # TODO: This is very bad
-        if fname.find(source['in']) == 0:
-            fname = fname.replace(source['in'], source['out'])
+        if fname.find(asource['in']) == 0:
+            source = asource
             break
-    
-    # Write file
-    
-    return (fname, text, clas)
+
+    if source:
+        # Read file
+        try:
+            f = open(fname)
+        except FileNotFoundError:
+            raise AssetException("File %s not found" % fname)
+        text = f.read()
+        f.close()
+
+        # Process
+        (fname, text, clas) = process(fname, text)
+
+        # rename directory
+        # TODO: This is very bad
+        fname = fname.replace(source['in'], source['out'])
+
+        # Write file
+        make_sure_path_exists(fname)
+        f = open(fname, "w")
+        f.write(text)
+        f.close()
+
+        return (fname, text, clas)
+    else:
+        raise AssetException("File %s not in input sources" % fname)

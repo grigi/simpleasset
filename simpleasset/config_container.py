@@ -35,7 +35,7 @@ class ConfigContainer(object):
             self.load()
         return self.config[name]
 
-    def __str__(self):
-        if not self.configured:
-            self.load()
-        return json.dumps(self.config, indent=4, sort_keys=True)
+    #def __str__(self):
+        #if not self.configured:
+            #self.load()
+        #return json.dumps(self.config, indent=4, sort_keys=True)

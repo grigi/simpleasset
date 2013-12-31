@@ -1,3 +1,30 @@
 {
+    "ASSET_EXTS": {
+        "tmpl":     "text/generictemplate",
+        "template": "text/generictemplate",
+        "jinja":    "text/jinja2"
+    },
 
+    "ASSET_FILTERS": {
+        "text/generictemplate": {
+            "type": "python",
+            "func": "jinja2_filter"
+        },
+        "text/jinja2": {
+            "type": "python",
+            "func": "jinja2_filter"
+        }
+    },
+
+    "ASSET_SOURCES": [
+        {
+            "in": "samples",
+            "out": "samples/out"
+        }
+    ],
+    
+    "ASSET_CONTEXT": {
+        "name": "John Doe",
+        "chain_name": "{{ name }}"
+    }    
 }
