@@ -20,7 +20,9 @@ class ConfigContainer(object):
         'Loads the configuration from either CAPI_CONFIG env variable, or DEFUALT_CONFIG'
 
         if self.configured is False:
-            self.config = json.load(open(os.getenv('ASSETCONFIG', DEFAULT_CONFIG)))
+            f = open(os.getenv('ASSETCONFIG', DEFAULT_CONFIG))
+            self.config = json.load(f)
+            f.close()
             self.config['PROJECT_ROOT'] = PROJECT_ROOT
             self.configured = True
         else:
@@ -32,3 +34,8 @@ class ConfigContainer(object):
         if not self.configured:
             self.load()
         return self.config[name]
+
+    def __str__(self):
+        if not self.configured:
+            self.load()
+        return json.dumps(self.config, indent=4, sort_keys=True)

@@ -15,8 +15,11 @@ setup(
     test_suite='simpleasset.test_suite',
 
     # Dependencies
-    install_requires=[],
-    tests_require=[],
+    install_requires=[
+    ],
+    tests_require=[
+        "jinja2",
+    ],
 
     # Packages
     packages=['simpleasset'],

@@ -10,6 +10,7 @@ checkdeps:
 	@pip install -q pylint docutils
 
 deps:
+	@pip install -q jinja2
 
 check: checkdeps
 	@python setup.py -q check -m -r -s
@@ -17,3 +18,7 @@ check: checkdeps
 
 test: check deps
 	@python setup.py -q test
+
+nose: check deps
+	@nosetests --with-coverage --cover-package=simpleasset --with-spec --spec-color
+

@@ -53,7 +53,7 @@ Feature Plan:
 
 3. Ability to concatenate input sources based on Glob rules speficied in configuration, for "Production" data.
 
-4. Ability to "translate" production data (treat it as its own mime-type?)
+4. Ability to "translate" production data (treat it as its own class?)
 
 5. Deaemonize tool.
 
