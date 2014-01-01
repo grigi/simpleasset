@@ -44,6 +44,12 @@ class AssetIntegration(unittest.TestCase):
         with self.assertRaises(simpleasset.AssetException):
             simpleasset.process_file("samples/file_not_here")
 
+    def test_piped_template(self):
+        "Test piped processing"
+        (fname, text, clas) = simpleasset.process("something.txt.pipetest", "1:2:3\na:b\n")
+        self.assertEqual(fname, "something.txt")
+        self.assertEqual(text, "1\na\n")
+        self.assertEqual(clas, "")
 
 if __name__ == '__main__':
     unittest.main()

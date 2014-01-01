@@ -1,8 +1,9 @@
 {
     "ASSET_EXTS": {
-        "tmpl":     "text/generictemplate",
+        "tmpl"    : "text/generictemplate",
         "template": "text/generictemplate",
-        "jinja":    "text/jinja2"
+        "jinja"   : "text/jinja2",
+        "pipetest": "ridiculous/pipetest"
     },
 
     "ASSET_FILTERS": {
@@ -13,6 +14,10 @@
         "text/jinja2": {
             "type": "python",
             "func": "jinja2_filter"
+        },
+        "ridiculous/pipetest": {
+            "type": "pipe",
+            "args": ["gawk", "-F:", "{ print $1 }"]
         }
     },
 
@@ -22,9 +27,9 @@
             "out": "samples/out"
         }
     ],
-    
+
     "ASSET_CONTEXT": {
         "name": "John Doe",
         "chain_name": "{{ name }}"
-    }    
+    }
 }

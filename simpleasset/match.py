@@ -1,5 +1,6 @@
 import errno
 import os
+from subprocess import PIPE, Popen
 
 from simpleasset import AssetException, config, filters
 
@@ -33,13 +34,19 @@ def process(fname, text, clas=""):
             except AttributeError:
                 raise AssetException("Filter %s not available." % filt['func'])
             text = fun(text, config.ASSET_CONTEXT)
-            fname = ".".join(fname.split(".")[:-1])
 
         elif filt['type'] == "pipe":
-            pass
+            p = Popen(filt['args'], stdout=PIPE, stderr=PIPE, stdin=PIPE)
+            newtext, err = p.communicate(str(text).encode('utf-8'))
+            if p.returncode == 0:
+                # TODO: This won't work for Python2
+                text = bytes(newtext).decode('utf-8')
+            else:
+                raise AssetException("Pipe failed with status code %d\n%s" % (p.returncode, err))
         else:
             raise AssetException("Type %s not understood." % filt['type'])
 
+        fname = ".".join(fname.split(".")[:-1])
         mime = config.ASSET_EXTS.get(fname.split(".")[-1], None)
     return (fname, text, clas)
 
