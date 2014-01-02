@@ -23,7 +23,10 @@ class AssetIntegration(unittest.TestCase):
 
     def test_file_template(self):
         "Test file loader"
-        os.unlink("samples/out/hello.txt")
+        try:
+            os.unlink("samples/out/hello.txt")
+        except Exception:
+            pass
 
         (fname, text, clas) = simpleasset.process_file("samples/hello.txt.tmpl")
         self.assertEqual(fname, "samples/out/hello.txt")
@@ -36,13 +39,11 @@ class AssetIntegration(unittest.TestCase):
 
     def test_file_baddir_template(self):
         "Test file loader - bad source directory"
-        with self.assertRaises(simpleasset.AssetException):
-            simpleasset.process_file("verybadsamples/hello.txt.tmpl")
+        self.assertRaises(simpleasset.AssetException, simpleasset.process_file, "verybadsamples/hello.txt.tmpl")
 
     def test_file_badfile_template(self):
         "Test file loader - file doesn't exist"
-        with self.assertRaises(simpleasset.AssetException):
-            simpleasset.process_file("samples/file_not_here")
+        self.assertRaises(simpleasset.AssetException, simpleasset.process_file, "samples/file_not_here")
 
     def test_piped_template(self):
         "Test piped processing"

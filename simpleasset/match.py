@@ -1,8 +1,13 @@
 import errno
 import os
+import sys
 from subprocess import PIPE, Popen
 
 from simpleasset import AssetException, config, filters
+
+VER = float(sys.version_info[0])+sys.version_info[1]/10.0
+if VER < 3.3:
+    FileNotFoundError = IOError
 
 ASSET_CLASSES = {
     "": [
@@ -39,7 +44,6 @@ def process(fname, text, clas=""):
             p = Popen(filt['args'], stdout=PIPE, stderr=PIPE, stdin=PIPE)
             newtext, err = p.communicate(str(text).encode('utf-8'))
             if p.returncode == 0:
-                # TODO: This won't work for Python2
                 text = bytes(newtext).decode('utf-8')
             else:
                 raise AssetException("Pipe failed with status code %d\n%s" % (p.returncode, err))
