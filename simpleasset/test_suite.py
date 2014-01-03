@@ -1,8 +1,10 @@
+"Tests for simpleasset"
+
 import os
 import unittest
 
 import simpleasset
-
+from simpleasset.compat import * # pylint: disable=W0401
 
 class AssetIntegration(unittest.TestCase):
     "Basic Integration tests for simpleasset"
@@ -25,7 +27,7 @@ class AssetIntegration(unittest.TestCase):
         "Test file loader"
         try:
             os.unlink("samples/out/hello.txt")
-        except Exception:
+        except FileNotFoundError:
             pass
 
         (fname, text, clas) = simpleasset.process_file("samples/hello.txt.tmpl")
@@ -33,9 +35,9 @@ class AssetIntegration(unittest.TestCase):
         self.assertEqual(text, "Hello John Doe!")
         self.assertEqual(clas, "")
 
-        f = open("samples/out/hello.txt")
-        self.assertEqual(text, f.read())
-        f.close()
+        ifl = open("samples/out/hello.txt")
+        self.assertEqual(text, ifl.read())
+        ifl.close()
 
     def test_file_baddir_template(self):
         "Test file loader - bad source directory"
@@ -54,3 +56,5 @@ class AssetIntegration(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+

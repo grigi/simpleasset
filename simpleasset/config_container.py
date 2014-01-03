@@ -1,6 +1,7 @@
 """
 SimpleAsset config singleton
 """
+
 import json
 import os
 
@@ -20,9 +21,9 @@ class ConfigContainer(object):
         'Loads the configuration from either CAPI_CONFIG env variable, or DEFUALT_CONFIG'
 
         if self.configured is False:
-            f = open(os.getenv('ASSETCONFIG', DEFAULT_CONFIG))
-            self.config = json.load(f)
-            f.close()
+            cfl = open(os.getenv('ASSETCONFIG', DEFAULT_CONFIG))
+            self.config = json.load(cfl)
+            cfl.close()
             self.config['PROJECT_ROOT'] = PROJECT_ROOT
             self.configured = True
         else:

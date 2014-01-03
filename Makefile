@@ -12,13 +12,19 @@ checkdeps:
 deps:
 	@pip install -q jinja2
 
+nosedeps:
+	@pip install -q nose coverage pinocchio
+
 check: checkdeps
-	@python setup.py -q check -m -r -s
 	@pylint -E setup.py simpleasset
+	@-python setup.py -q check -m -r -s
 
 test: check deps
 	@python setup.py -q test
 
-nose: check deps
+nose: nosedeps deps
 	@nosetests --with-coverage --cover-package=simpleasset --with-spec --spec-color
 
+tox:
+	@pip install -q tox
+	@tox

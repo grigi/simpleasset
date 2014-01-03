@@ -1,13 +1,15 @@
+"""
+SimpleAsset rule matcher
+"""
+
+from __future__ import unicode_literals
+
 import errno
 import os
-import sys
 from subprocess import PIPE, Popen
 
 from simpleasset import AssetException, config, filters
-
-VER = float(sys.version_info[0])+sys.version_info[1]/10.0
-if VER < 3.3:
-    FileNotFoundError = IOError
+from simpleasset.compat import * # pylint: disable=W0401
 
 ASSET_CLASSES = {
     "": [
@@ -20,6 +22,8 @@ ASSET_CLASSES = {
 
 
 def make_sure_path_exists(path):
+    "Ensures a path exists"
+
     path = os.path.dirname(path)
     try:
         os.makedirs(path)
@@ -29,6 +33,8 @@ def make_sure_path_exists(path):
 
 
 def process(fname, text, clas=""):
+    "Processes document based on matched rules"
+
     mime = config.ASSET_EXTS.get(fname.split(".")[-1], None)
     while mime:
         filt = config.ASSET_FILTERS[mime]
@@ -41,12 +47,12 @@ def process(fname, text, clas=""):
             text = fun(text, config.ASSET_CONTEXT)
 
         elif filt['type'] == "pipe":
-            p = Popen(filt['args'], stdout=PIPE, stderr=PIPE, stdin=PIPE)
-            newtext, err = p.communicate(str(text).encode('utf-8'))
-            if p.returncode == 0:
+            proc = Popen(filt['args'], stdout=PIPE, stderr=PIPE, stdin=PIPE)
+            newtext, err = proc.communicate(text.encode('utf-8'))
+            if proc.returncode == 0:
                 text = bytes(newtext).decode('utf-8')
             else:
-                raise AssetException("Pipe failed with status code %d\n%s" % (p.returncode, err))
+                raise AssetException("Pipe failed with status code %d\n%s" % (proc.returncode, err))
         else:
             raise AssetException("Type %s not understood." % filt['type'])
 
@@ -56,6 +62,8 @@ def process(fname, text, clas=""):
 
 
 def process_file(fname):
+    "Processes a file through process()"
+
     # get asset directory
     source = None
     for asource in config.ASSET_SOURCES:
@@ -67,11 +75,11 @@ def process_file(fname):
     if source:
         # Read file
         try:
-            f = open(fname)
+            ifl = open(fname)
         except FileNotFoundError:
             raise AssetException("File %s not found" % fname)
-        text = f.read()
-        f.close()
+        text = ifl.read()
+        ifl.close()
 
         # Process
         (fname, text, clas) = process(fname, text)
@@ -82,9 +90,9 @@ def process_file(fname):
 
         # Write file
         make_sure_path_exists(fname)
-        f = open(fname, "w")
-        f.write(text)
-        f.close()
+        ofl = open(fname, "w")
+        ofl.write(text)
+        ofl.close()
 
         return (fname, text, clas)
     else:
