@@ -27,7 +27,7 @@ class AssetIntegration(unittest.TestCase):
         "Test file loader"
         try:
             os.unlink("samples/out/hello.txt")
-        except FileNotFoundError:
+        except OSError:
             pass
 
         (fname, text, clas) = simpleasset.process_file("samples/hello.txt.tmpl")
