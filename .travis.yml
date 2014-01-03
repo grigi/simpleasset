@@ -1,12 +1,12 @@
 language: python
-python: 3.3
-env:
-  - TOX_ENV=py26
-  - TOX_ENV=py27
-  - TOX_ENV=py32
-  - TOX_ENV=py33
-  - TOX_ENV=pypy
+python:
+  - 2.6
+  - 2.7
+  - 3.2
+  - 3.3
+  - pypy
 install:
   - pip install tox
 script:
+  - export TOX_ENV=`echo $TRAVIS_PYTHON_VERSION | sed -E 's/^([0-9])\.([0-9])$/py\1\2/'`
   - tox -e $TOX_ENV
