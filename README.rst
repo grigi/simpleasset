@@ -3,6 +3,9 @@ simpleasset
 ===========
 Simple asset pipeline toolset
 
+.. image:: https://travis-ci.org/grigi/simpleasset.png
+   :target: https://travis-ci.org/grigi/simpleasset
+
 ----
 
 What does it do?
