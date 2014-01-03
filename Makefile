@@ -28,3 +28,6 @@ nose: nosedeps deps
 tox:
 	@pip install -q tox
 	@tox
+
+lint:
+	@-pylint -r n --msg-template='{msg_id}: {line}, {column}: {msg} ({symbol}){obj}' setup.py simpleasset scripts/*.py

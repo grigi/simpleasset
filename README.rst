@@ -50,9 +50,9 @@ You can speficy a configuration file through the ``ASSETCONFIG`` Environment var
 Feature Plan:
 =============
 
-1. Simple stand-alone tool that can translate data through an extention-determined MIME-type. This is to output the translated document to a configured location.
+1. Simple stand-alone tool that can translate data through an extention-determined MIME-type. This is to output the translated document to a configured location. (DONE)
 
-2. Ability to pipe data through both external programs and python functions (with configurable context)
+2. Ability to pipe data through both external programs and python functions (with configurable context) (DONE)
 
 3. Ability to concatenate input sources based on Glob rules speficied in configuration, for "Production" data.
 

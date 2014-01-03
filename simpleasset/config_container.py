@@ -17,11 +17,14 @@ class ConfigContainer(object):
         self.config = {}
         self.configured = False
 
-    def load(self):
-        'Loads the configuration from either CAPI_CONFIG env variable, or DEFUALT_CONFIG'
+    def load(self, configfile=None):
+        'Loads the configuration from either ASSETCONFIG env variable, or DEFUALT_CONFIG'
+
+        if not configfile:
+            configfile = os.getenv('ASSETCONFIG', DEFAULT_CONFIG)
 
         if self.configured is False:
-            cfl = open(os.getenv('ASSETCONFIG', DEFAULT_CONFIG))
+            cfl = open(configfile)
             self.config = json.load(cfl)
             cfl.close()
             self.config['PROJECT_ROOT'] = PROJECT_ROOT

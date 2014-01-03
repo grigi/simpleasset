@@ -1,7 +1,21 @@
 "Simple Asset pipeline toolset"
+import sys
+
 from setuptools import setup
 
 import simpleasset
+
+INSTALL_DEPS = []
+TEST_DEPS = []
+
+PYVER = sys.version_info[0:2]
+if PYVER == (2, 6):
+    INSTALL_DEPS.append('argparse')
+if PYVER == (3, 2):
+    TEST_DEPS.append("Jinja2 == 2.6")
+else:
+    TEST_DEPS.append("Jinja2")
+
 
 setup(
     name='simpleasset',
@@ -16,11 +30,8 @@ setup(
     test_suite='simpleasset.test_suite',
 
     # Dependencies
-    install_requires=[
-    ],
-    tests_require=[
-        "jinja2",
-    ],
+    install_requires=INSTALL_DEPS,
+    tests_require=TEST_DEPS,
 
     # Packages
     packages=['simpleasset'],
@@ -29,6 +40,7 @@ setup(
 
     # Scripts
     scripts=[
+        "scripts/assetgen.py",
     ],
 
     # Classifiers
@@ -49,4 +61,3 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ]
 )
-
