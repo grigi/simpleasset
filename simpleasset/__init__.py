@@ -11,4 +11,4 @@ class AssetException(Exception):
     "Standard Asset exception"
     pass
 
-from simpleasset.match import process, process_file
+from simpleasset.match import process, process_file, process_dir

@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import errno
 import os
+from os.path import isfile, join
 from subprocess import PIPE, Popen
 
 from simpleasset import AssetException, config, filters
@@ -61,39 +62,46 @@ def process(fname, text, clas=""):
     return (fname, text, clas)
 
 
-def process_file(fname):
+def process_file(oname, source, dest):
     "Processes a file through process()"
 
-    # get asset directory
-    source = None
-    for asource in config.ASSET_SOURCES:
-        # TODO: This is very bad
-        if fname.find(asource['in']) == 0:
-            source = asource
-            break
+    # Read file
+    try:
+        ifl = open(oname)
+    except FileNotFoundError:
+        raise AssetException("File %s not found" % oname)
+    text = ifl.read()
+    ifl.close()
 
-    if source:
-        # Read file
+    # Process
+    (fname, text, clas) = process(oname, text)
+
+    # rename directory
+    # TODO: This is very bad
+    fname = fname.replace(source, dest)
+
+    # Write file
+    make_sure_path_exists(fname)
+    ofl = open(fname, "w")
+    ofl.write(text)
+    ofl.close()
+
+    return (fname, text, clas)
+
+def process_dir(source, dest):
+    "Process a directory"
+
+    res = []
+
+    onlyfiles = [ f for f in os.listdir(source) if isfile(join(source, f)) ]
+    for fil in onlyfiles:
+        oname = join(source, fil)
+
         try:
-            ifl = open(fname)
-        except FileNotFoundError:
-            raise AssetException("File %s not found" % fname)
-        text = ifl.read()
-        ifl.close()
+            (fname, text, clas) = process_file(oname, source, dest) # pylint: disable=W0612
+            res.append((True, oname, fname))
+        except AssetException as exc:
+            res.append((False, oname, str(exc)))
 
-        # Process
-        (fname, text, clas) = process(fname, text)
+    return res
 
-        # rename directory
-        # TODO: This is very bad
-        fname = fname.replace(source['in'], source['out'])
-
-        # Write file
-        make_sure_path_exists(fname)
-        ofl = open(fname, "w")
-        ofl.write(text)
-        ofl.close()
-
-        return (fname, text, clas)
-    else:
-        raise AssetException("File %s not in input sources" % fname)

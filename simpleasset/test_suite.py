@@ -30,7 +30,7 @@ class AssetIntegration(unittest.TestCase):
         except OSError:
             pass
 
-        (fname, text, clas) = simpleasset.process_file("samples/hello.txt.tmpl")
+        (fname, text, clas) = simpleasset.process_file("samples/hello.txt.tmpl", "samples", "samples/out")
         self.assertEqual(fname, "samples/out/hello.txt")
         self.assertEqual(text, "Hello John Doe!")
         self.assertEqual(clas, "")
@@ -41,11 +41,11 @@ class AssetIntegration(unittest.TestCase):
 
     def test_file_baddir_template(self):
         "Test file loader - bad source directory"
-        self.assertRaises(simpleasset.AssetException, simpleasset.process_file, "verybadsamples/hello.txt.tmpl")
+        self.assertRaises(simpleasset.AssetException, simpleasset.process_file, "verybadsamples/hello.txt.tmpl", "samples", "samples/out")
 
     def test_file_badfile_template(self):
         "Test file loader - file doesn't exist"
-        self.assertRaises(simpleasset.AssetException, simpleasset.process_file, "samples/file_not_here")
+        self.assertRaises(simpleasset.AssetException, simpleasset.process_file, "samples/file_not_here", "samples", "samples/out")
 
     def test_piped_template(self):
         "Test piped processing"
@@ -53,6 +53,24 @@ class AssetIntegration(unittest.TestCase):
         self.assertEqual(fname, "something.txt")
         self.assertEqual(text, "1\na\n")
         self.assertEqual(clas, "")
+
+    def test_process_dir(self):
+        "Test directory processing"
+        try:
+            os.unlink("samples/out/hello.txt")
+        except OSError:
+            pass
+
+        res = simpleasset.process_dir("samples", "samples/out")
+        val = [val for val in res if val[1] == "samples/hello.txt.tmpl"]
+        self.assertEqual(len(val), 1)
+        self.assertEqual(val[0][2], "samples/out/hello.txt")
+        self.assertEqual(val[0][0], True)
+
+        ifl = open("samples/out/hello.txt")
+        self.assertEqual(ifl.read(), "Hello John Doe!")
+        ifl.close()
+
 
 if __name__ == '__main__':
     unittest.main()
