@@ -23,7 +23,7 @@ test: check deps
 	@python setup.py -q test
 
 nose: nosedeps deps
-	@nosetests --with-coverage --cover-package=simpleasset --with-spec --spec-color
+	@nosetests --with-coverage --cover-erase --cover-branches --cover-package=simpleasset --with-spec --spec-color
 
 tox:
 	@pip install -q tox

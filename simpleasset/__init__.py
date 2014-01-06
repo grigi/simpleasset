@@ -7,6 +7,7 @@ import simpleasset.config_container
 # Initialise config singleton
 config = simpleasset.config_container.ConfigContainer() # pylint: disable=C0103
 
+
 class AssetException(Exception):
     "Standard Asset exception"
     pass

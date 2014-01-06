@@ -6,6 +6,18 @@ import unittest
 import simpleasset
 from simpleasset.compat import * # pylint: disable=W0401
 
+def assertProccesedFile(self, res, oname, nname, fail=False, text=None):
+    val = [val for val in res if val[1] == oname]
+    self.assertEqual(len(val), 1)
+    self.assertEqual(val[0][2], nname)
+    self.assertEqual(val[0][0], not fail)
+
+    if text:
+        ifl = open(nname)
+        self.assertEqual(ifl.read(), text)
+        ifl.close()
+    
+
 class AssetIntegration(unittest.TestCase):
     "Basic Integration tests for simpleasset"
 
@@ -62,14 +74,10 @@ class AssetIntegration(unittest.TestCase):
             pass
 
         res = simpleasset.process_dir("samples", "samples/out")
-        val = [val for val in res if val[1] == "samples/hello.txt.tmpl"]
-        self.assertEqual(len(val), 1)
-        self.assertEqual(val[0][2], "samples/out/hello.txt")
-        self.assertEqual(val[0][0], True)
-
-        ifl = open("samples/out/hello.txt")
-        self.assertEqual(ifl.read(), "Hello John Doe!")
-        ifl.close()
+        assertProccesedFile(self, res, "samples/hello.txt.tmpl", "samples/out/hello.txt", text="Hello John Doe!")
+        assertProccesedFile(self, res, "samples/one.js", "samples/out/one.js")
+        assertProccesedFile(self, res, "samples/two.js.tmpl", "samples/out/two.js")
+        assertProccesedFile(self, res, "samples/three.tmpl.renamejs", "samples/out/three.js")
 
 
 if __name__ == '__main__':

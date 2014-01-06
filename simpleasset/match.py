@@ -17,7 +17,9 @@ ASSET_CLASSES = {
         "text/generictemplate",
         "text/jinja2"
     ],
-    "JS": [],
+    "JS": [
+        "text/javascript"
+    ],
     "CSS": []
 }
 
@@ -33,32 +35,43 @@ def make_sure_path_exists(path):
             raise
 
 
+def process_ext(ext, text, clas):
+    "Processes part based on extension"
+
+    mimeext = config.ASSET_EXTS.get(ext, None)
+    if mimeext:
+        mime = mimeext["mime"]
+        filt = config.ASSET_FILTERS.get(mime, None)
+        ext = mimeext.get("ext", None if filt else ext)
+
+        if filt:
+            if filt['type'] == "python":
+                try:
+                    fun = getattr(filters, filt['func'])
+                except AttributeError:
+                    raise AssetException("Filter %s not available." % filt['func'])
+                text = fun(text, config.ASSET_CONTEXT)
+
+            elif filt['type'] == "pipe":
+                proc = Popen(filt['args'], stdout=PIPE, stderr=PIPE, stdin=PIPE)
+                newtext, err = proc.communicate(text.encode('utf-8'))
+                if proc.returncode == 0:
+                    text = bytes(newtext).decode('utf-8')
+                else:
+                    raise AssetException("Pipe failed with status code %d\n%s" % (proc.returncode, err))
+            else:
+                raise AssetException("Type %s not understood." % filt['type'])
+
+    return (ext, text, clas)
+
+
 def process(fname, text, clas=""):
     "Processes document based on matched rules"
+    lst = fname.split(".")
+    for pos in reversed(range(1, len(lst))):
+        (lst[pos], text, clas) = process_ext(lst[pos], text, clas)
 
-    mime = config.ASSET_EXTS.get(fname.split(".")[-1], None)
-    while mime:
-        filt = config.ASSET_FILTERS[mime]
-
-        if filt['type'] == "python":
-            try:
-                fun = getattr(filters, filt['func'])
-            except AttributeError:
-                raise AssetException("Filter %s not available." % filt['func'])
-            text = fun(text, config.ASSET_CONTEXT)
-
-        elif filt['type'] == "pipe":
-            proc = Popen(filt['args'], stdout=PIPE, stderr=PIPE, stdin=PIPE)
-            newtext, err = proc.communicate(text.encode('utf-8'))
-            if proc.returncode == 0:
-                text = bytes(newtext).decode('utf-8')
-            else:
-                raise AssetException("Pipe failed with status code %d\n%s" % (proc.returncode, err))
-        else:
-            raise AssetException("Type %s not understood." % filt['type'])
-
-        fname = ".".join(fname.split(".")[:-1])
-        mime = config.ASSET_EXTS.get(fname.split(".")[-1], None)
+    fname = ".".join([lst[0]] + [ext for ext in lst[1:] if ext])
     return (fname, text, clas)
 
 
@@ -77,7 +90,7 @@ def process_file(oname, source, dest):
     (fname, text, clas) = process(oname, text)
 
     # rename directory
-    # TODO: This is very bad
+    # TODO: This is very bad, need to handle only leading directory name
     fname = fname.replace(source, dest)
 
     # Write file
@@ -88,12 +101,13 @@ def process_file(oname, source, dest):
 
     return (fname, text, clas)
 
+
 def process_dir(source, dest):
     "Process a directory"
 
     res = []
 
-    onlyfiles = [ f for f in os.listdir(source) if isfile(join(source, f)) ]
+    onlyfiles = [f for f in os.listdir(source) if isfile(join(source, f))]
     for fil in onlyfiles:
         oname = join(source, fil)
 

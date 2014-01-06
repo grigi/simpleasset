@@ -1,9 +1,24 @@
 {
     "ASSET_EXTS": {
-        "tmpl"    : "text/generictemplate",
-        "template": "text/generictemplate",
-        "jinja"   : "text/jinja2",
-        "pipetest": "ridiculous/pipetest"
+        "tmpl"    : {
+            "mime": "text/generictemplate"
+            },
+        "template": {
+            "mime": "text/generictemplate"
+            },
+        "jinja"   : {
+            "mime": "text/jinja2"
+            },
+        "pipetest": {
+            "mime": "ridiculous/pipetest"
+            },
+        "js"      : {
+            "mime": "text/javascript"
+            },
+        "renamejs": {
+            "mime": "text/javascript",
+            "ext" : "js"
+            }
     },
 
     "ASSET_FILTERS": {
