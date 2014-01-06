@@ -35,32 +35,30 @@ def make_sure_path_exists(path):
             raise
 
 
-def process_ext(ext, text, clas):
+def process_ext(mimeext, ext, text, clas):
     "Processes part based on extension"
 
-    mimeext = config.ASSET_EXTS.get(ext, None)
-    if mimeext:
-        mime = mimeext["mime"]
-        filt = config.ASSET_FILTERS.get(mime, None)
-        ext = mimeext.get("ext", None if filt else ext)
+    mime = mimeext["mime"]
+    filt = config.ASSET_FILTERS.get(mime, None)
+    ext = mimeext.get("ext", None if filt else ext)
 
-        if filt:
-            if filt['type'] == "python":
-                try:
-                    fun = getattr(filters, filt['func'])
-                except AttributeError:
-                    raise AssetException("Filter %s not available." % filt['func'])
-                text = fun(text, config.ASSET_CONTEXT)
+    if filt:
+        if filt['type'] == "python":
+            try:
+                fun = getattr(filters, filt['func'])
+            except AttributeError:
+                raise AssetException("Filter %s not available." % filt['func'])
+            text = fun(text, config.ASSET_CONTEXT)
 
-            elif filt['type'] == "pipe":
-                proc = Popen(filt['args'], stdout=PIPE, stderr=PIPE, stdin=PIPE)
-                newtext, err = proc.communicate(text.encode('utf-8'))
-                if proc.returncode == 0:
-                    text = bytes(newtext).decode('utf-8')
-                else:
-                    raise AssetException("Pipe failed with status code %d\n%s" % (proc.returncode, err))
+        elif filt['type'] == "pipe":
+            proc = Popen(filt['args'], stdout=PIPE, stderr=PIPE, stdin=PIPE)
+            newtext, err = proc.communicate(text.encode('utf-8'))
+            if proc.returncode == 0:
+                text = bytes(newtext).decode('utf-8')
             else:
-                raise AssetException("Type %s not understood." % filt['type'])
+                raise AssetException("Pipe failed with status code %d\n%s" % (proc.returncode, err))
+        else:
+            raise AssetException("Type %s not understood." % filt['type'])
 
     return (ext, text, clas)
 
@@ -69,7 +67,9 @@ def process(fname, text, clas=""):
     "Processes document based on matched rules"
     lst = fname.split(".")
     for pos in reversed(range(1, len(lst))):
-        (lst[pos], text, clas) = process_ext(lst[pos], text, clas)
+        mimeext = config.ASSET_EXTS.get(lst[pos], None)
+        if mimeext:
+            (lst[pos], text, clas) = process_ext(mimeext, lst[pos], text, clas)
 
     fname = ".".join([lst[0]] + [ext for ext in lst[1:] if ext])
     return (fname, text, clas)

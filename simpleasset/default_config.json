@@ -24,11 +24,15 @@
     "ASSET_FILTERS": {
         "text/generictemplate": {
             "type": "python",
-            "func": "jinja2_filter"
+            "func": "generic_template_filter"
         },
         "text/jinja2": {
             "type": "python",
             "func": "jinja2_filter"
+        },
+        "text/django": {
+            "type": "python",
+            "func": "django_template_filter"
         },
         "ridiculous/pipetest": {
             "type": "pipe",

@@ -6,7 +6,9 @@ from setuptools import setup
 import simpleasset
 
 INSTALL_DEPS = []
-TEST_DEPS = []
+TEST_DEPS = [
+    "Django"
+    ]
 
 PYVER = sys.version_info[0:2]
 if PYVER == (2, 6):
